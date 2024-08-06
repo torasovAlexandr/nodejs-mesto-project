@@ -4,9 +4,9 @@ import {
 import bcrypt from "bcryptjs";
 
 export interface IUser {
-  name: string;
-  about : string;
-  avatar : string;
+  name?: string;
+  about ?: string;
+  avatar? : string;
   email : string;
   password : string;
 }
@@ -20,17 +20,17 @@ const userSchema = new Schema<IUser, UserModel>({
     type: String,
     minlength: 2,
     maxlength: 30,
-    default:'',
+    default:undefined,
   },
   about: {
     type: String,
     minlength: 2,
     maxlength: 200,
-    default:'',
+    default:undefined,
   },
   avatar: {
     type: String,
-    default:'',
+    default:undefined,
   },
   email: {
     type: String,

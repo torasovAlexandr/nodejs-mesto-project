@@ -3,7 +3,7 @@ import jwt from 'jsonwebtoken';
 import { AuthContext } from "../types/auth-context";
 import NotAuthorizedError from "../errors/not-authorized-error";
 
-const { JWT_SECRET='' } = process.env;
+const { JWT_SECRET='jwt_secret' } = process.env;
 
 
 

@@ -10,7 +10,7 @@ import User from "../models/user";
 import { AuthContext } from "../types/auth-context";
 import NotAuthorizedError from "../errors/not-authorized-error";
 
-const { JWT_SECRET='' } = process.env;
+const {JWT_SECRET='jwt_secret'} = process.env;
 
 const getUsers = async (_req: Request, res: Response, next: NextFunction) => {
   try {
@@ -40,6 +40,7 @@ const getMe = async (req: Request, res: Response<unknown, AuthContext>, next: Ne
   req.params.userId = `${res.locals.user._id}`;
   getUserById(req, res, next);
 };
+
 
 
 
@@ -100,16 +101,16 @@ const signin = async (req: Request, res: Response, next:NextFunction) => {
 
   try {
     const user = await User.findOne({ email }).select('+password');
-    if (!user) return next(new NotAuthorizedError);
+    if (!user) return next(new NotAuthorizedError('Неверный email или пароль'));
 
     const match = await bcrypt.compare(password, user.password);
-    if (!match) return next(new NotAuthorizedError);
+    if (!match) return next(new NotAuthorizedError('Неверный email или пароль'));
 
     res.send({
       token: jwt.sign({ _id: user._id }, JWT_SECRET, { expiresIn: '7d' }),
     });
   } catch (err:any) {
-    res.status(401).send({ message: err?.message });
+    next(new NotAuthorizedError)
   }
 };
 
