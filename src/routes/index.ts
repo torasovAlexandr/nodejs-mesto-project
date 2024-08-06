@@ -4,6 +4,7 @@ import userRouter from './users';
 import cardRouter from "./cards";
 import { signin, signup } from "../controllers/users";
 import auth from "../middleware/auth";
+import NotFoundError from "../errors/not-found-error";
 
 const router = Router();
 
@@ -35,5 +36,8 @@ router.post(
 router.use(auth);
 router.use('/users', userRouter);
 router.use('/cards', cardRouter);
+router.use('*',(_req,_res, next)=>{
+  next(new NotFoundError)
+});
 
 export default router;

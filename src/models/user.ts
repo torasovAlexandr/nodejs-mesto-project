@@ -18,7 +18,6 @@ interface UserModel extends Model<IUser> {
 const userSchema = new Schema<IUser, UserModel>({
   name: {
     type: String,
-    // required: [true, 'Поле name не может быть пустым'],
     minlength: 2,
     maxlength: 30,
   },
@@ -29,7 +28,6 @@ const userSchema = new Schema<IUser, UserModel>({
   },
   avatar: {
     type: String,
-    // required: [true, 'Поле avatar не может быть пустым'],
   },
   email: {
     type: String,
@@ -47,7 +45,7 @@ const userSchema = new Schema<IUser, UserModel>({
 
 }, { versionKey: false, timestamps: true });
 
-// eslint-disable-next-line max-len
+
 userSchema.static('findUserByCredentials', function findUserByCredentials(email: string, password: string) {
   return this.findOne({ email }).then((user) => {
     if (!user) {

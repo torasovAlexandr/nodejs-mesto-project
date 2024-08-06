@@ -67,7 +67,6 @@ const likeCard = async (req: Request, res:Response<unknown, AuthContext>, next: 
   }
 };
 
-// eslint-disable-next-line max-len
 const dislikeCard = async (req: Request, res:Response<unknown, AuthContext>, next: NextFunction) => {
   try {
     const { cardId } = req.params;

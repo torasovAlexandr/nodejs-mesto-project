@@ -1,17 +1,12 @@
-import e, { Request, Response, NextFunction } from 'express';
+import  { Request, Response, NextFunction } from 'express';
 import jwt from 'jsonwebtoken';
 import { AuthContext } from "../types/auth-context";
+import NotAuthorizedError from "../errors/not-authorized-error";
 
-const { JWT_SECRET } = process.env;
-if (!JWT_SECRET) {
-  throw Error('look at env');
-}
+const { JWT_SECRET='' } = process.env;
 
-export const handleAuthError = (res: Response) => {
-  res
-    .status(401)
-    .send({ message: 'Необходима авторизация' });
-};
+
+
 
 const extractBearerToken = (header: string) => header.replace('Bearer ', '');
 
@@ -19,7 +14,7 @@ export default (req: Request, res: Response<unknown, AuthContext>, next: NextFun
   const { authorization } = req.headers;
 
   if (!authorization || !authorization.startsWith('Bearer ')) {
-    return handleAuthError(res);
+    return next(new NotAuthorizedError);
   }
 
   const token = extractBearerToken(authorization);
@@ -27,13 +22,12 @@ export default (req: Request, res: Response<unknown, AuthContext>, next: NextFun
   try {
     payload = jwt.verify(token, JWT_SECRET);
   } catch (err) {
-    return handleAuthError(res);
+    return next(new NotAuthorizedError);
   }
 
-  // записываем пейлоуд в объект запроса
-  if (typeof payload === 'string') return next('Не валидный токен');
+  if (typeof payload === 'string') return next(new NotAuthorizedError('Не валидный токен'));
 
   res.locals.user = payload;
 
-  next(); // пропускаем запрос дальше
+  next();
 };

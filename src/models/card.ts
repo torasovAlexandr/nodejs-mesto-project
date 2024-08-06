@@ -5,7 +5,6 @@ export interface ICard {
   link:string
   owner:ObjectId
   likes:ObjectId[]
-  // createdAt:Date,
 }
 
 const cardSchema = new Schema<ICard>({

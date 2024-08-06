@@ -3,18 +3,14 @@ import { constants } from "http2";
 import { Error as MongooseError } from "mongoose";
 import bcrypt from 'bcryptjs';
 import jwt from 'jsonwebtoken';
-import { celebrate, Joi } from 'celebrate';
 import BadRequestError from "../errors/bad-request-error";
 import ConflictError from '../errors/conflict-error';
 import NotFoundError from "../errors/not-found-error";
 import User from "../models/user";
 import { AuthContext } from "../types/auth-context";
-import { handleAuthError } from "../middleware/auth";
+import NotAuthorizedError from "../errors/not-authorized-error";
 
-const { JWT_SECRET } = process.env;
-if (!JWT_SECRET) {
-  throw Error('look at env');
-}
+const { JWT_SECRET='' } = process.env;
 
 const getUsers = async (_req: Request, res: Response, next: NextFunction) => {
   try {
@@ -45,17 +41,39 @@ const getMe = async (req: Request, res: Response<unknown, AuthContext>, next: Ne
   getUserById(req, res, next);
 };
 
-const updateUser = (req:Request) => User.findByIdAndUpdate(
-  req.params.cardId,
-  req.body,
-  { new: true },
-);
 
-const updateAvatar = (req:Request) => User.findByIdAndUpdate(
-  req.params.cardId,
-  { avatar: req.body.avatar },
-  { new: true },
-);
+
+
+const updateUser= async (req: Request, res: Response, next: NextFunction) => {
+  try {
+    const  userId  = res.locals.user._id;
+    const user = await User.findByIdAndUpdate(userId, req.body, {new:true}).orFail(
+      () => new NotFoundError("Пользователь не найден"),
+    );
+    res.send(user);
+  } catch (error) {
+    if (error instanceof MongooseError.CastError) {
+      return next(new BadRequestError("Не валидный id"));
+    }
+    return next(error);
+  }
+};
+
+
+const updateAvatar =async (req: Request, res: Response, next: NextFunction) => {
+  try {
+    const  userId  = res.locals.user._id;
+    const user = await User.findByIdAndUpdate(userId,  { avatar: req.body.avatar }, {new:true}).orFail(
+      () => new NotFoundError("Пользователь не найден"),
+    );
+    res.send(user);
+  } catch (error) {
+    if (error instanceof MongooseError.CastError) {
+      return next(new BadRequestError("Не валидный id"));
+    }
+    return next(error);
+  }
+};
 
 const signup = async (req: Request, res: Response, next: NextFunction) => {
   try {
@@ -77,15 +95,15 @@ const signup = async (req: Request, res: Response, next: NextFunction) => {
   }
 };
 
-const signin = async (req: Request, res: Response) => {
+const signin = async (req: Request, res: Response, next:NextFunction) => {
   const { email, password } = req.body;
 
   try {
     const user = await User.findOne({ email }).select('+password');
-    if (!user) return handleAuthError(res);
+    if (!user) return next(new NotAuthorizedError);
 
     const match = await bcrypt.compare(password, user.password);
-    if (!match) return handleAuthError(res);
+    if (!match) return next(new NotAuthorizedError);
 
     res.send({
       token: jwt.sign({ _id: user._id }, JWT_SECRET, { expiresIn: '7d' }),
