@@ -20,14 +20,17 @@ const userSchema = new Schema<IUser, UserModel>({
     type: String,
     minlength: 2,
     maxlength: 30,
+    default:'',
   },
   about: {
     type: String,
     minlength: 2,
     maxlength: 200,
+    default:'',
   },
   avatar: {
     type: String,
+    default:'',
   },
   email: {
     type: String,

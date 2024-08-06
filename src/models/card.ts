@@ -1,10 +1,12 @@
-import { model, ObjectId, Schema } from 'mongoose';
+import { model, ObjectId, Schema, Date } from 'mongoose';
 
 export interface ICard {
   name:string
   link:string
   owner:ObjectId
   likes:ObjectId[]
+  createdAt:Date
+  updatedAt:Date
 }
 
 const cardSchema = new Schema<ICard>({
