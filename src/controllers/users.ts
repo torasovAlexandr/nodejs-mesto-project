@@ -110,7 +110,7 @@ const signin = async (req: Request, res: Response, next:NextFunction) => {
       token: jwt.sign({ _id: user._id }, JWT_SECRET, { expiresIn: '7d' }),
     });
   } catch (err:any) {
-    next(new NotAuthorizedError)
+    next(err)
   }
 };
 
