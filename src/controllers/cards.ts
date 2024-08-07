@@ -38,7 +38,9 @@ const deleteCard = async (req: Request, res:Response<unknown, AuthContext>, next
     const { cardId } = req.params;
     const owner = res.locals?.user?._id || '';
 
-    const card = await Card.findById(cardId);
+    const card = await Card.findById(cardId).orFail(
+      () => new NotFoundError("карточка не найдена"),
+    );
     if (card?.owner.toString() !== owner) return next(new ForbiddenError());
 
     await Card.deleteOne({ _id: cardId });

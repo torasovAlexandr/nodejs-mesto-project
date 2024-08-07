@@ -32,7 +32,7 @@ const userPatchValidator = celebrate({
 const userAvatarValidator = celebrate({
   body: Joi.object().keys({
     avatar: Joi.string().uri(),
-  }).unknown(true),
+  }),
 });
 
 export {
