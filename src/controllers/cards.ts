@@ -6,6 +6,7 @@ import ConflictError from '../errors/conflict-error';
 import NotFoundError from "../errors/not-found-error";
 import Card from "../models/card";
 import { AuthContext } from "../types/auth-context";
+import ForbiddenError from "../errors/forbidden-error";
 
 const getCards = async (_req: Request, res: Response, next: NextFunction) => {
   try {
@@ -36,10 +37,13 @@ const deleteCard = async (req: Request, res:Response<unknown, AuthContext>, next
   try {
     const { cardId } = req.params;
     const owner = res.locals?.user?._id || '';
-    await Card.deleteOne({ _id: cardId, owner }).orFail(
-      () => new NotFoundError("карточка не найдена"),
-    );
-    return res.send("карточка удалена");
+
+    const card = await Card.findById(cardId);
+    if (card?.owner.toString() !== owner) return next(new ForbiddenError());
+
+    await Card.deleteOne({ _id: cardId });
+
+    return res.send(card);
   } catch (error) {
     if (error instanceof MongooseError.CastError) {
       return next(new BadRequestError("Не валидный id"));
@@ -67,7 +71,11 @@ const likeCard = async (req: Request, res:Response<unknown, AuthContext>, next: 
   }
 };
 
-const dislikeCard = async (req: Request, res:Response<unknown, AuthContext>, next: NextFunction) => {
+const dislikeCard = async (
+  req: Request,
+  res:Response<unknown, AuthContext>,
+  next: NextFunction,
+) => {
   try {
     const { cardId } = req.params;
     const newCard = await Card.findByIdAndUpdate(

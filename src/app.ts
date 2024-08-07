@@ -1,7 +1,7 @@
 import "dotenv/config";
 import express from "express";
 import mongoose from 'mongoose';
-import { join } from 'path';
+import { errors } from "celebrate";
 import errorHandler from './middleware/error-handler';
 import router from './routes';
 import { errorLogger, requestLogger } from "./middleware/logger";
@@ -11,11 +11,10 @@ const { PORT = "3000", MONGO_URL = "mongodb://127.0.0.1:27017/mestodb" } = proce
 
 app.use(express.json());
 
-app.use(express.static(join(__dirname, "public")));
 app.use(requestLogger);
 app.use(router);
 app.use(errorLogger);
-
+app.use(errors());
 app.use(errorHandler);
 const connect = async () => {
   await mongoose.connect(MONGO_URL);

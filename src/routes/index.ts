@@ -1,43 +1,30 @@
 import { Router } from 'express';
-import { celebrate, Joi } from "celebrate";
 import userRouter from './users';
 import cardRouter from "./cards";
 import { signin, signup } from "../controllers/users";
 import auth from "../middleware/auth";
 import NotFoundError from "../errors/not-found-error";
+import { userPostValidator, userSignInValidator } from "../validators/user";
 
 const router = Router();
 
 router.post(
   '/signup',
-  celebrate({
-    body: Joi.object().keys({
-      name: Joi.string().max(30),
-      about: Joi.string().max(200),
-      email: Joi.string().email(),
-      password: Joi.string(),
-      avatar: Joi.string().uri(),
-    }).unknown(true),
-  }),
+  userPostValidator,
   signup,
 );
 
 router.post(
   '/signin',
-  celebrate({
-    body: Joi.object().keys({
-      email: Joi.string().email(),
-      password: Joi.string(),
-    }).unknown(true),
-  }),
+  userSignInValidator,
   signin,
 );
 
 router.use(auth);
 router.use('/users', userRouter);
 router.use('/cards', cardRouter);
-router.use('*',(_req,_res, next)=>{
-  next(new NotFoundError)
+router.use('*', (_req, _res, next) => {
+  next(new NotFoundError());
 });
 
 export default router;

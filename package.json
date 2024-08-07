@@ -7,7 +7,9 @@
     "lint": "npx eslint src/**/*.ts",
     "build": "tsc",
     "start": "ts-node src/app.ts",
-    "dev": "ts-node-dev src/app.ts"
+    "dev": "ts-node-dev src/app.ts",
+    "eslint": "npx eslint --ext .ts src/",
+    "eslintfix": "npx eslint --ext .ts src/ --fix"
   },
   "author": "Maxim",
   "license": "ISC",

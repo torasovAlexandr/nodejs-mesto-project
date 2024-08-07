@@ -1,4 +1,6 @@
-import { model, ObjectId, Schema, Date } from 'mongoose';
+import {
+  model, ObjectId, Schema, Date,
+} from 'mongoose';
 
 export interface ICard {
   name:string
@@ -23,6 +25,7 @@ const cardSchema = new Schema<ICard>({
   owner: {
     type: Schema.Types.ObjectId,
     ref: 'user',
+    required: [true, 'Поле owner не может быть пустым'],
   },
   likes: {
     default: [],
